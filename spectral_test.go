@@ -45,12 +45,12 @@ func Test_GetLaplacian(t *testing.T) {
 func Test_GetSmallEigenVectors(t *testing.T) {
 	A, _ := LoadAdjacency("./karate.csv")
 	L := GetLaplacian(A)
-	E := GetSmallestEigenVectors(L, 2)
+	E := GetSmallestEigenVectors(L, 4)
 	rows, cols := E.Dims()
 	if rows != 34 {
 		t.Error("expected n rows got", rows)
 	}
-	if cols != 2 {
+	if cols != 4 {
 		t.Error("expected 2 rows got", cols)
 	}
 }
@@ -60,16 +60,26 @@ func Test_KMeans(t *testing.T) {
 	L := GetLaplacian(A)
 	E := GetSmallestEigenVectors(L, 4)
 	labels, _ := KMeans(E, 2, 10)
-	l01 := labels[0]
+
+	l00 := labels[0]
 	l33 := labels[33]
 
-	if l01 == l33 {
+	if l00 == l33 {
 		t.Error("1 and 34 should not be in the same community")
 	}
-	if labels[2] != l01 {
+	if labels[2] != l00 {
 		t.Error("1 and 2 should not be in the same community")
 	}
 	if labels[32] != l33 {
 		t.Error("33 and 34 should not be in the same community")
+	}
+}
+
+func Benchmark_KMeans(b *testing.B) {
+	A, _ := LoadAdjacency("./karate.csv")
+	for n := 0; n < b.N; n++ {
+		L := GetLaplacian(A)
+		E := GetSmallestEigenVectors(L, 4)
+		_, _ = KMeans(E, 2, 10)
 	}
 }

@@ -15,11 +15,11 @@ func LoadAdjacency(path string) (mat.Symmetric, error) {
 		return nil, err
 	}
 	edges, err := csv.NewReader(file).ReadAll()
-	A := CreateSparseMatrix(edges)
+	A := CreateSymmetricMatrix(edges)
 	return A, err
 }
 
-func CreateSparseMatrix(edges [][]string) mat.Symmetric {
+func CreateSymmetricMatrix(edges [][]string) mat.Symmetric {
 	A := mat.NewSymDense(34, nil)
 	for _, edge := range edges {
 		start, _ := strconv.Atoi(edge[0])
