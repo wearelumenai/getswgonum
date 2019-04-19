@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gonum.org/v1/gonum/mat"
 	"testing"
 )
 
@@ -53,12 +54,23 @@ func Test_GetSmallEigenVectors(t *testing.T) {
 	if cols != 4 {
 		t.Error("expected 2 rows got", cols)
 	}
+	for i := 0; i < 4; i++ {
+		AssertEigenVectorNorm(E, i, t)
+	}
+}
+
+func AssertEigenVectorNorm(E mat.Matrix, i int, t *testing.T) {
+	eigen := mat.NewDense(34, 1, mat.Col(nil, i, E))
+	norm := mat.Norm(eigen, 2)
+	if norm < .99999 || norm > 1.00001 {
+		t.Error("eigen vectors should have norm 1")
+	}
 }
 
 func Test_KMeans(t *testing.T) {
 	A, _ := LoadAdjacency("./karate.csv")
 	L := GetLaplacian(A)
-	E := GetSmallestEigenVectors(L, 4)
+	E := GetSmallestEigenVectors(L, 2)
 	labels, _ := KMeans(E, 2, 10)
 
 	l00 := labels[0]
@@ -67,11 +79,11 @@ func Test_KMeans(t *testing.T) {
 	if l00 == l33 {
 		t.Error("1 and 34 should not be in the same community")
 	}
-	if labels[2] != l00 {
-		t.Error("1 and 2 should not be in the same community")
+	if labels[1] != l00 {
+		t.Error("1 and 2 should be in the same community")
 	}
 	if labels[32] != l33 {
-		t.Error("33 and 34 should not be in the same community")
+		t.Error("33 and 34 should be in the same community")
 	}
 }
 
@@ -79,7 +91,7 @@ func Benchmark_KMeans(b *testing.B) {
 	A, _ := LoadAdjacency("./karate.csv")
 	for n := 0; n < b.N; n++ {
 		L := GetLaplacian(A)
-		E := GetSmallestEigenVectors(L, 4)
+		E := GetSmallestEigenVectors(L, 2)
 		_, _ = KMeans(E, 2, 10)
 	}
 }

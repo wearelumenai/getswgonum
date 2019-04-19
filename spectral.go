@@ -24,9 +24,6 @@ func CreateSymmetricMatrix(edges [][]string) mat.Symmetric {
 	for _, edge := range edges {
 		start, _ := strconv.Atoi(edge[0])
 		end, _ := strconv.Atoi(edge[1])
-		if start > 34 || end > 34 {
-			panic("")
-		}
 		A.SetSym(start-1, end-1, 1.)
 	}
 	return A
@@ -61,7 +58,7 @@ func GetSmallestEigenVectors(L mat.Symmetric, k int) mat.Matrix {
 	decomposition.Factorize(L, true)
 	E := mat.NewDense(n, n, nil)
 	decomposition.VectorsTo(E)
-	return E.Slice(0, n, n-k, n)
+	return E.Slice(0, n, n-k-1, n-1)
 }
 
 func KMeans(E mat.Matrix, k int, iter int) ([]int, error) {
@@ -74,9 +71,10 @@ func KMeans(E mat.Matrix, k int, iter int) ([]int, error) {
 }
 
 func main() {
+	const nbCommunities = 2
 	A, _ := LoadAdjacency("./karate.csv")
 	L := GetLaplacian(A)
-	E := GetSmallestEigenVectors(L, 4)
-	labels, _ := KMeans(E, 3, 10)
+	E := GetSmallestEigenVectors(L, nbCommunities)
+	labels, _ := KMeans(E, nbCommunities, 10)
 	log.Print(labels)
 }
