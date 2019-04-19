@@ -18,11 +18,23 @@ func LoadAdjacency(path string) (mat.Symmetric, error) {
 }
 
 func CreateSymmetricMatrix(edges [][]string) mat.Symmetric {
-	A := mat.NewSymDense(34, nil)
+	A := mat.NewSymDense(2, nil)
 	for _, edge := range edges {
 		start, _ := strconv.Atoi(edge[0])
 		end, _ := strconv.Atoi(edge[1])
+		A = growIfNecessary(A, start, end)
 		A.SetSym(start-1, end-1, 1.)
+	}
+	return A
+}
+
+func growIfNecessary(A *mat.SymDense, start int, end int) *mat.SymDense {
+	if n := A.Symmetric(); start > n || end > n {
+		if start > end {
+			A = A.GrowSym(start - n).(*mat.SymDense)
+		} else {
+			A = A.GrowSym(end - n).(*mat.SymDense)
+		}
 	}
 	return A
 }
