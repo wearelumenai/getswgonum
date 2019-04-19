@@ -2,6 +2,8 @@ package main
 
 import (
 	"gonum.org/v1/gonum/mat"
+	"os"
+	"syscall"
 	"testing"
 )
 
@@ -20,6 +22,13 @@ func Test_LoadAdjacency(t *testing.T) {
 	}
 	if w := A.At(0, 29); w != 0. {
 		t.Error("expected 0 got", w)
+	}
+}
+
+func Test_LoadAdjacencyError(t *testing.T) {
+	_, err := LoadAdjacency("./unknown.txt")
+	if e, ok := err.(*os.PathError); ok && e.Err == syscall.ENOSPC {
+		t.Error("an error was expected")
 	}
 }
 

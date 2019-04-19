@@ -4,19 +4,17 @@ import (
 	"encoding/csv"
 	"github.com/bugra/kmeans"
 	"gonum.org/v1/gonum/mat"
-	"log"
 	"os"
 	"strconv"
 )
 
 func LoadAdjacency(path string) (mat.Symmetric, error) {
 	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
+	if err == nil {
+		edges, err := csv.NewReader(file).ReadAll()
+		return CreateSymmetricMatrix(edges), err
 	}
-	edges, err := csv.NewReader(file).ReadAll()
-	A := CreateSymmetricMatrix(edges)
-	return A, err
+	return nil, err
 }
 
 func CreateSymmetricMatrix(edges [][]string) mat.Symmetric {
@@ -68,13 +66,4 @@ func KMeans(E mat.Matrix, k int, iter int) ([]int, error) {
 		rawData[i] = mat.Row(nil, i, E)
 	}
 	return kmeans.Kmeans(rawData, k, kmeans.EuclideanDistance, iter)
-}
-
-func main() {
-	const nbCommunities = 2
-	A, _ := LoadAdjacency("./karate.csv")
-	L := GetLaplacian(A)
-	E := GetSmallestEigenVectors(L, nbCommunities)
-	labels, _ := KMeans(E, nbCommunities, 10)
-	log.Print(labels)
 }
